@@ -1,5 +1,5 @@
-FROM million12/centos-supervisor:latest
-MAINTAINER Marcin Ryzycki marcin@m12.io, Przemyslaw Ozgo linux@ozgo.info
+FROM maszto/docker-centos-supervisor:latest
+MAINTAINER Dawid Szymczak dawid.szymczak@masz.to
 
 # - Install Nginx
 # - Rename nginx:nginx user/group to www:www

@@ -1,21 +1,20 @@
 # Nginx docker container
-[![Circle CI](https://circleci.com/gh/million12/docker-nginx.svg?style=svg)](https://circleci.com/gh/million12/docker-nginx)
 
-This is a [million12/nginx](https://registry.hub.docker.com/u/million12/nginx/) docker container with Nginx web server, nicely tuned for a better performance.
+This is a [maszto/docker-nginx](https://registry.hub.docker.com/u/million12/nginx/) docker container with Nginx web server, nicely tuned for a better performance.
 
 Things included:
 
 ##### - directory structure
 ```
 /data/www # meant to contain web content
-/data/www/default # default vhost directory
+/data/www/_default # default vhost directory
 /data/conf/nginx/ # extra configs to customise Nginx (see below)
 ```
 The container will re-create above structure if it's missing - in case you'd use external /data volume.
 
 ##### - default vhost
 
-Default vhost is configured and served from `/data/www/default`.
+Default vhost is configured and served from `/data/www/_default`.
 
 ##### - error logging
 
@@ -30,15 +29,33 @@ Folders `/etc/nginx/` and `/data/conf/nginx/` are monitored for any config chang
 
 ## Usage
 
-`docker run -d -p=80:80 -p=443:443 million12/nginx`
+`docker run -d -p=80:80 -p=443:443 maszto/docker-nginx`
 
 With data container:  
 ```
-docker run -d -v /data --name=web-data busybox
-docker run -d --volumes-from=web-data -p=80:80 --name=web million12/nginx
+docker run -d -v /data --name=data maszto/docker-centos-supervisor
+docker run -d --volumes-from=data -p=80:80 -p=80:80 --name=nginx maszto/docker-nginx
+```
+
+With PHP-FPM container link:
+```
+docker run -d --volumes-from=data -p=9000:9000 --name=php-fpm maszto/docker-php-fpm
+docker run -d --volumes-from=data -p=80:80 --link=php-fpm:php-fpm --name=nginx maszto/docker-nginx
 ```
 
 After that you can see the default vhost content (something like: '*default vhost created on [timestamp]*') when you open http://CONTAINER_IP:PORT/ in the browser.
+
+## Things included 
+
+##### - GeoIP
+
+MaxMind GeoIP module configuration and database, geo params are also mapped to fastcgi params in conf.d/default_fastcgi_params.conf file.
+ 
+##### - Static files expiration config
+
+Located in conf.d
+
+##### - 
 
 ## Customise
 
@@ -47,8 +64,11 @@ Modify Nginx global configuration (http {} context) by adding configs in followi
 /etc/nginx/nginx.d/*.conf
 /data/conf/nginx/nginx.d/*.conf
 
-/etc/nginx/addon.d/*.conf
-/data/conf/nginx/addon.d/*.conf
+/etc/nginx/init.d/*.conf
+/data/conf/nginx/init.d/*.conf
+
+/etc/nginx/conf.d/*.conf
+/data/conf/nginx/conf.d/*.conf
 ```
 
 Add vhosts by placing their configs in following locations:  
@@ -72,10 +92,4 @@ This might be useful during development, when container's ports are exposed outs
 
 
 ## Authors
-
-Author: ryzy (<marcin@m12.io>)  
-Author: pozgo (<linux@ozgo.info>)
-
----
-
-**Sponsored by** [Typostrap.io - the new prototyping tool](http://typostrap.io/) for building highly-interactive prototypes of your website or web app. Built on top of TYPO3 Neos CMS and Zurb Foundation framework.
+Author: Dawid Szymczak (<dawid.szymczak@masz.to>)
